@@ -89,33 +89,74 @@ void DrawWorldTime::drawBitmap(HDC hdc, HBITMAP hBitmap){
     DeleteDC(hBuffer);
 }
 
+/* タイムゾーン名を分割して取得
+   TCHAR* szNameIn タイムゾーン名 (形式: AEST/AEDT)
+   TCHAR* szST 標準時タイムゾーン名 (出力)
+   TCHAR* szDT 夏時間タイムゾーン名 (出力)
+   戻り値: OK 成功時 ERR エラー時
+*/
+int DrawWorldTime::splitTZName(TCHAR* szNameIn, TCHAR* szST, TCHAR* szDT){
+
+    TCHAR* pToken = NULL;
+    size_t iLen = 0;
+
+    // 最初のトークン
+    if((pToken = _tcsstr(szNameIn, "/")) == NULL)
+        return ERR;
+
+    iLen = _tcslen(szNameIn) - _tcslen(pToken);
+    _tcsncpy(szST, szNameIn, iLen);
+    *(szST + iLen) = '\0';
+
+    // 次のトークン
+    _tcscpy(szDT, pToken+1);
+
+    return OK;
+}
+
 /* テキストを描画
    HDC hdc デバイスコンテキストハンドル
    戻り値: なし
 */
 void DrawWorldTime::drawText(HDC hdc){
 
-    int iTZOffset;
+    int iTZOffset;          // タイムゾーンオフセット調整
+    char szST[10];          // 標準時タイムゾーン名格納用
+    char szDT[10];          // 夏時間タイムゾーン名格納用
 
     SetBkMode(hdc , TRANSPARENT);           // 背景色を透明にする
     SelectObject(hdc , this->hFont);        // フォントの選択
 
     // それぞれのタイムゾーンの日時を表示
     for(int i=0; i<iMaxDateTime; i++){
-
-        // タイムゾーン名の微妙な位置調整
-        iTZOffset = (lstrlen(mDateTime[i].szName) == 3)?8:4;
+        // タイムゾーン名を分割
+        if(splitTZName(mDateTime[i].szName, szST, szDT) != OK){
+            _tcscpy(szST, mDateTime[i].szName);
+            _tcscpy(szDT, mDateTime[i].szName);
+        }
 
         // 夏時間
         if(mDateTime[i].isDST){
-            SetTextColor(hdc, RGB(255, 255, 0));    // テキスト色は黄
-        }else{
-            SetTextColor(hdc, RGB(255, 255, 255));  // テキスト色は白
-        }
 
-        // タイムゾーン名
-        TextOut(hdc, mDateTime[i].x+iTZOffset, mDateTime[i].y,
-                mDateTime[i].szName, lstrlen(mDateTime[i].szName));
+            // タイムゾーン名の微妙な位置調整
+            iTZOffset = (lstrlen(szDT) == 3)?8:4;
+
+            // テキスト色は黄
+            SetTextColor(hdc, RGB(255, 255, 0));
+
+            // タイムゾーン名表示
+            TextOut(hdc, mDateTime[i].x+iTZOffset, mDateTime[i].y, szDT, lstrlen(szDT));
+        }else{
+
+            // タイムゾーン名の微妙な位置調整
+            iTZOffset = (lstrlen(szST) == 3)?8:4;
+
+            // テキスト色は白
+            SetTextColor(hdc, RGB(255, 255, 255));
+
+            // タイムゾーン名表示
+            TextOut(hdc, mDateTime[i].x+iTZOffset, mDateTime[i].y, szST, lstrlen(szST));
+        }
 
         // 日付と時刻
         TextOut(hdc, mDateTime[i].x, mDateTime[i].y+10,
