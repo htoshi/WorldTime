@@ -71,7 +71,7 @@ int WINAPI WinMain(HINSTANCE    hInstance,
         DispatchMessage(&msg);
     }
 
-    return msg.wParam;
+    return (int)msg.wParam;
 }
 
 /* ウィンドウ生成

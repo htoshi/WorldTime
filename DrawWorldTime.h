@@ -12,7 +12,7 @@
 
 #include <windows.h>
 #include <commctrl.h>
-#include "WorldTimeDLL.h"
+#include "WorldTimeCalc.h"
 
 // #define __DEBUG__ 1
 
@@ -37,6 +37,9 @@ class DrawWorldTime {
 
         // 日時情報構造体配列
         datetimeinfo_t mDateTime[8];
+
+        // 世界時刻計算クラス
+        WorldTimeCalc* mWorldTimeCalc;
 
         // 現在日時をセット
         void setCurrentTime(datetimeinfo_t*, datetime_t*);

@@ -30,6 +30,9 @@ DrawWorldTime::DrawWorldTime(HWND hwnd, LPARAM lparam){
 
     SendMessage(hTool, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
 
+    // 世界時刻計算クラス
+    mWorldTimeCalc = new WorldTimeCalc();
+
     // フォントの作成
     this->hFont = CreateFont(
             12, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
@@ -73,6 +76,10 @@ DrawWorldTime::DrawWorldTime(HWND hwnd, LPARAM lparam){
 
 /* デストラクタ */
 DrawWorldTime::~DrawWorldTime() {
+
+    // 世界時刻計算クラス削除
+    if(mWorldTimeCalc != NULL)
+        delete(mWorldTimeCalc);
 
     // フォント削除
     DeleteObject(hFont);
@@ -152,35 +159,35 @@ void DrawWorldTime::setCurrentTime(){
     datetime_t dtGMT, dt;
 
     // GMT をセット
-    getCurrentGMT(&dtGMT);
+    mWorldTimeCalc->getCurrentGMT(&dtGMT);
     setCurrentTime(&mDateTime[0], &dtGMT);
 
     // JST をセット
-    getJST(&dt, &dtGMT);
+    mWorldTimeCalc->getJST(&dt, &dtGMT);
     setCurrentTime(&mDateTime[1], &dt);
 
     // AEST をセット
-    getAEST(&dt, &dtGMT);
+    mWorldTimeCalc->getAEST(&dt, &dtGMT);
     setCurrentTime(&mDateTime[2], &dt);
 
     // AWST をセット
-    getAWST(&dt, &dtGMT);
+    mWorldTimeCalc->getAWST(&dt, &dtGMT);
     setCurrentTime(&mDateTime[3], &dt);
 
     // PST をセット
-    getPST(&dt, &dtGMT);
+    mWorldTimeCalc->getPST(&dt, &dtGMT);
     setCurrentTime(&mDateTime[4], &dt);
 
     // EST をセット
-    getEST(&dt, &dtGMT);
+    mWorldTimeCalc->getEST(&dt, &dtGMT);
     setCurrentTime(&mDateTime[5], &dt);
 
     // CET をセット
-    getCET(&dt, &dtGMT);
+    mWorldTimeCalc->getCET(&dt, &dtGMT);
     setCurrentTime(&mDateTime[6], &dt);
 
     // MSK をセット
-    getMSK(&dt, &dtGMT);
+    mWorldTimeCalc->getMSK(&dt, &dtGMT);
     setCurrentTime(&mDateTime[7], &dt);
 }
 

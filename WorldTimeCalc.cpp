@@ -4,12 +4,13 @@
  *
  * Copyright (C) 2004, Toshi All rights reserved.
 */
-#include "WorldTimeDLL.h"
+#include "WorldTimeCalc.h"
 
-// DLL メイン
-int WINAPI DllMain(HINSTANCE hInst, DWORD fdwReason, PVOID pvReserved){
-    return TRUE;
-}
+// コンストラクタ
+WorldTimeCalc::WorldTimeCalc() {}
+
+// デストラクタ
+WorldTimeCalc::~WorldTimeCalc() {}
 
 /* zeller の公式により曜日を求める
    int iYear 年
@@ -17,7 +18,7 @@ int WINAPI DllMain(HINSTANCE hInst, DWORD fdwReason, PVOID pvReserved){
    int iDay 日
    戻り値: 0 日曜日～6 土曜日
 */
-int zeller(int iYear, int iMonth, int iDay){
+int WorldTimeCalc::zeller(int iYear, int iMonth, int iDay){
 
     // 1月と2月は前年の13月・14月として計算
     if(iMonth <= 2){
@@ -33,7 +34,7 @@ int zeller(int iYear, int iMonth, int iDay){
    int iYear 年
    int iMonth 月
 */
-int getDayOfMonth(int iYear, int iMonth){
+int WorldTimeCalc::getDayOfMonth(int iYear, int iMonth){
 
     static const int dayMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
@@ -50,7 +51,7 @@ int getDayOfMonth(int iYear, int iMonth){
    int iMonth 月
    戻り値: 月の最初の日曜日の日付
 */
-int getMonthFirstSunday(int iYear, int iMonth){
+int WorldTimeCalc::getMonthFirstSunday(int iYear, int iMonth){
 
     // 1日の曜日を求める
     int iDayWeek = zeller(iYear, iMonth, 1);
@@ -67,7 +68,7 @@ int getMonthFirstSunday(int iYear, int iMonth){
    int iMonth 月
    戻り値: 月の最後の日曜日の日付
 */
-int getMonthLastSunday(int iYear, int iMonth){
+int WorldTimeCalc::getMonthLastSunday(int iYear, int iMonth){
 
     int iDayWeek;
 
@@ -96,7 +97,7 @@ int getMonthLastSunday(int iYear, int iMonth){
    bool isInclude 指定日を含む場合 true
    戻り値: true 範囲内 false 範囲外
 */
-bool isDataInSpecifiedRange(int iMonth, int iDay,
+bool WorldTimeCalc::isDataInSpecifiedRange(int iMonth, int iDay,
         int iFromMonth, int iFromDay, int iToMonth, int iToDay,
         bool isInclude){
 
@@ -132,7 +133,7 @@ bool isDataInSpecifiedRange(int iMonth, int iDay,
     datetime_t* dt  日付時刻構造体
     int iOffsetMin  オフセット(分)
 */
-int getDateTimeByOffset(datetime_t* dt, int iOffsetMin){
+int WorldTimeCalc::getDateTimeByOffset(datetime_t* dt, int iOffsetMin){
 
     int iHour, iMin;
 
@@ -197,7 +198,7 @@ int getDateTimeByOffset(datetime_t* dt, int iOffsetMin){
     int iHour 時
     int iMin 分
 */
-int getTotalMinutesInDay(int iHour, int iMin){
+int WorldTimeCalc::getTotalMinutesInDay(int iHour, int iMin){
 
     return iHour*60 + iMin;
 }
@@ -205,7 +206,7 @@ int getTotalMinutesInDay(int iHour, int iMin){
 /* 現在のGMT時刻を取得 (グリニッジ標準時)
     datetime_t* dt  日付時刻構造体
 */
-_EXPORT int getCurrentGMT(datetime_t* dt){
+int WorldTimeCalc::getCurrentGMT(datetime_t* dt){
 
     SYSTEMTIME stTime;
 
@@ -227,7 +228,7 @@ _EXPORT int getCurrentGMT(datetime_t* dt){
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
 */
-_EXPORT int getJST(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getJST(datetime_t* dt, datetime_t* dt_in){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
@@ -248,7 +249,7 @@ _EXPORT int getJST(datetime_t* dt, datetime_t* dt_in){
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
 */
-_EXPORT int getAEST(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getAEST(datetime_t* dt, datetime_t* dt_in){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
@@ -302,7 +303,7 @@ _EXPORT int getAEST(datetime_t* dt, datetime_t* dt_in){
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
 */
-_EXPORT int getAWST(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getAWST(datetime_t* dt, datetime_t* dt_in){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
@@ -323,7 +324,7 @@ _EXPORT int getAWST(datetime_t* dt, datetime_t* dt_in){
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
 */
-_EXPORT int getPST(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getPST(datetime_t* dt, datetime_t* dt_in){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
@@ -388,7 +389,7 @@ lblSummerTime:
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
 */
-_EXPORT int getEST(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getEST(datetime_t* dt, datetime_t* dt_in){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
@@ -397,6 +398,8 @@ _EXPORT int getEST(datetime_t* dt, datetime_t* dt_in){
     dt->Hour = dt_in->Hour;
     dt->Minute = dt_in->Minute;
     dt->Second = dt_in->Second;
+    dt->isDST = false;
+
     dt->isDST = false;
 
     // PST = GMT - 5 (-300min)
@@ -453,7 +456,7 @@ lblSummerTime:
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
 */
-_EXPORT int getCET(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getCET(datetime_t* dt, datetime_t* dt_in){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
@@ -518,7 +521,7 @@ lblSummerTime:
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
 */
-_EXPORT int getMSK(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getMSK(datetime_t* dt, datetime_t* dt_in){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
