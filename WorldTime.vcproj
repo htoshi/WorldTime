@@ -78,6 +78,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="comctl32.lib"
 				OutputFile="$(OutDir)/WorldTime.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
@@ -135,6 +136,9 @@
 				RelativePath=".\DrawWorldTime.h">
 			</File>
 			<File
+				RelativePath=".\WorldTime.h">
+			</File>
+			<File
 				RelativePath=".\WorldTimeCalc.h">
 			</File>
 			<File
@@ -145,6 +149,9 @@
 			Name="リソース ファイル"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			<File
+				RelativePath=".\resource.h">
+			</File>
 			<File
 				RelativePath=".\WorldTime.rc">
 			</File>

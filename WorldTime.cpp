@@ -1,39 +1,13 @@
+/*
+ * 世界時計メイン
+ *  $Id$
+ *
+ * Copyright (C) 2005, Toshi All rights reserved.
+*/
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 
-#include "DrawWorldTime.h"
-#include "WorldTimeConfig.h"
-
-/* メニューID設定 */
-#define IDM_WORLDTIME_ABOUT 1
-#define IDM_WORLDTIME_STAYTOP 2
-#define IDM_WORLDTIME_TOOLTIP 3
-
-/* 定数 */
-#define IDC_STATIC_WINDOWCLASSNAME "WorldTime"
-#define IDC_STATIC_APPNAME "世界時計"
-#define IDC_STATIC_AUTHOR "Toshi"
-#define IDC_STATIC_VERSION "Version 0.1 Alpha"
-#define IDC_STATIC_COPYRIGHT \
-		IDC_STATIC_APPNAME " " IDC_STATIC_VERSION " " IDC_STATIC_AUTHOR
-
-// #define __DEBUG__ 1
-
-/* プロトタイプ宣言 */
-LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
-BOOL InitInstance(HINSTANCE, int);
-
-void addMenu(HWND, bool, bool);
-void deleteMenu(HWND);
-void toggleMenuStayTop(HWND);
-void toggleShowToolTip(HWND);
-
-void OnMouseMove(HWND, DrawWorldTime*);
-void OnTimer(HWND, DrawWorldTime*);
-
-#ifdef __DEBUG__
-void debug(TCHAR* szBuf);
-#endif
+#include "WorldTime.h"
 
 /* アプリケーションエントリーポイント */
 int WINAPI WinMain(HINSTANCE    hInstance,
@@ -60,7 +34,7 @@ int WINAPI WinMain(HINSTANCE    hInstance,
     // ウィンドウ生成
     if(!InitInstance(hInstance, CmdShow)){
         MessageBox(NULL, TEXT("初期化時にエラーが発生しました"),
-                         IDC_STATIC_APPNAME, MB_ICONINFORMATION | MB_OK);
+                         IDC_STATIC_APPNAME, MB_ICONSTOP | MB_OK);
 
         return FALSE;
     }

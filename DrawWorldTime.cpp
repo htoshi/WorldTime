@@ -2,12 +2,15 @@
  * 世界の時刻を描画
  *  $Id$
  *
- * Copyright (C) 2004, Toshi All rights reserved.
+ * Copyright (C) 2005, Toshi All rights reserved.
 */
+#include "resource.h"
 #include "DrawWorldTime.h"
 
 /* コンストラクタ */
 DrawWorldTime::DrawWorldTime(HWND hwnd, LPARAM lparam){
+
+    WorldTimeConfig* config;    // 設定ファイルクラス
 
     // コモンコントロール初期化
     InitCommonControls();
@@ -40,38 +43,22 @@ DrawWorldTime::DrawWorldTime(HWND hwnd, LPARAM lparam){
             CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
             VARIABLE_PITCH | FF_ROMAN , "MS Gothic");
 
-    // 日時情報格納構造体・初期化
-    mDateTime[0].x = 30; mDateTime[0].y = 20;
-    lstrcpy(mDateTime[0].szName, TEXT("GMT"));
-    lstrcpy(mDateTime[0].szInfo, "グリニッジ標準時");
+    // 設定ファイルから設定を読み込み
+    config = new WorldTimeConfig();
 
-    mDateTime[1].x = 170; mDateTime[1].y = 60;
-    lstrcpy(mDateTime[1].szName, TEXT("JST"));
-    lstrcpy(mDateTime[1].szInfo, TEXT("日本標準時"));
+    int iRet = config->readAreaInfo(mDateTime);
 
-    mDateTime[2].x = 200; mDateTime[2].y = 130;
-    lstrcpy(mDateTime[2].szName, TEXT("AEST"));
-    lstrcpy(mDateTime[2].szInfo, TEXT("豪州東部標準時 (Sydney・Canberra)"));
+    // INI ファイル異常
+    if(iRet == ERR){
+        MessageBox(NULL, TEXT("INIファイル異常"),
+                         IDC_STATIC_APPNAME, MB_ICONSTOP | MB_OK);
 
-    mDateTime[3].x = 130; mDateTime[3].y = 130;
-    lstrcpy(mDateTime[3].szName, TEXT("AWST"));
-    lstrcpy(mDateTime[3].szInfo, TEXT("豪州西部標準時 (Perth)"));
+        exit(ERR);
+    }
 
-    mDateTime[4].x = 260; mDateTime[4].y = 60;
-    lstrcpy(mDateTime[4].szName, TEXT("PST"));
-    lstrcpy(mDateTime[4].szInfo, TEXT("太平洋標準時 (Los Angeles・San Fransisco)"));
+    iMaxDateTime = iRet;    // 日時情報構造体に格納された数を設定
 
-    mDateTime[5].x = 310; mDateTime[5].y = 60;
-    lstrcpy(mDateTime[5].szName, TEXT("EST"));
-    lstrcpy(mDateTime[5].szInfo, TEXT("東海岸標準時 (New York・Washington)"));
-
-    mDateTime[6].x = 50; mDateTime[6].y = 60;
-    lstrcpy(mDateTime[6].szName, TEXT("CET"));
-    lstrcpy(mDateTime[6].szInfo, TEXT("中央ヨーロッパ時間 (Germany)"));
-
-    mDateTime[7].x = 90; mDateTime[7].y = 40;
-    lstrcpy(mDateTime[7].szName, TEXT("MSK"));
-    lstrcpy(mDateTime[7].szInfo, TEXT("モスクワ時間 (Moscow)"));
+    delete(config);
 }
 
 /* デストラクタ */
@@ -114,7 +101,7 @@ void DrawWorldTime::drawText(HDC hdc){
     SelectObject(hdc , this->hFont);        // フォントの選択
 
     // それぞれのタイムゾーンの日時を表示
-    for(int i=0; i<sizeof(mDateTime)/sizeof(mDateTime[0]); i++){
+    for(int i=0; i<iMaxDateTime; i++){
 
         // タイムゾーン名の微妙な位置調整
         iTZOffset = (lstrlen(mDateTime[i].szName) == 3)?8:4;
@@ -157,38 +144,36 @@ void DrawWorldTime::setCurrentTime(datetimeinfo_t* dtinfo, datetime_t* dt){
 void DrawWorldTime::setCurrentTime(){
 
     datetime_t dtGMT, dt;
+    dstinfo_t dstStart, dstEnd;
 
-    // GMT をセット
+    // GMT を取得
     mWorldTimeCalc->getCurrentGMT(&dtGMT);
-    setCurrentTime(&mDateTime[0], &dtGMT);
 
-    // JST をセット
-    mWorldTimeCalc->getJST(&dt, &dtGMT);
-    setCurrentTime(&mDateTime[1], &dt);
+    // 各エリアの時刻を取得してセット
+    for(int i=0; i<iMaxDateTime; i++){
 
-    // AEST をセット
-    mWorldTimeCalc->getAEST(&dt, &dtGMT);
-    setCurrentTime(&mDateTime[2], &dt);
+        // 夏時間情報をセット
+        if(mDateTime[i].hasDST){
 
-    // AWST をセット
-    mWorldTimeCalc->getAWST(&dt, &dtGMT);
-    setCurrentTime(&mDateTime[3], &dt);
+            // 夏時間開始情報
+            dstStart.Month = mDateTime[i].iDSTStartMonth;
+            dstStart.Type = mDateTime[i].szDSTStartType;
+            dstStart.WeekDay = mDateTime[i].iDSTStartWeekDay;
+            dstStart.Time = mDateTime[i].iDSTStartTime;
 
-    // PST をセット
-    mWorldTimeCalc->getPST(&dt, &dtGMT);
-    setCurrentTime(&mDateTime[4], &dt);
+            // 夏時間終了情報
+            dstEnd.Month = mDateTime[i].iDSTEndMonth;
+            dstEnd.Type = mDateTime[i].szDSTEndType;
+            dstEnd.WeekDay = mDateTime[i].iDSTEndWeekDay;
+            dstEnd.Time = mDateTime[i].iDSTEndTime;
+        }
 
-    // EST をセット
-    mWorldTimeCalc->getEST(&dt, &dtGMT);
-    setCurrentTime(&mDateTime[5], &dt);
+        // 世界時刻取得
+        mWorldTimeCalc->getWorldTime(&dt, &dtGMT, mDateTime[i].offset,
+            mDateTime[i].hasDST, &dstStart, &dstEnd);
 
-    // CET をセット
-    mWorldTimeCalc->getCET(&dt, &dtGMT);
-    setCurrentTime(&mDateTime[6], &dt);
-
-    // MSK をセット
-    mWorldTimeCalc->getMSK(&dt, &dtGMT);
-    setCurrentTime(&mDateTime[7], &dt);
+        setCurrentTime(&mDateTime[i], &dt);
+    }
 }
 
 /* ツールチップをアクティベート

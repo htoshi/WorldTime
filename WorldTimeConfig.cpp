@@ -2,7 +2,7 @@
  * 初期設定ファイルクラス
  *  $Id$
  *
- * Copyright (C) 2004, Toshi All rights reserved.
+ * Copyright (C) 2005, Toshi All rights reserved.
 */
 #include "WorldTimeConfig.h"
 
@@ -190,6 +190,180 @@ int WorldTimeConfig::writeToolTipFlag(bool isShow){
     return OK;
 }
 
+/* エリア情報読み出し
+    datetimeinfo_t dtInfo[] 日時情報格納構造体
+    戻り値 読み込んだエリア情報数
+*/
+int WorldTimeConfig::readAreaInfo(datetimeinfo_t dtInfo[]){
+
+    TCHAR szIniFileName[_MAX_PATH];
+    TCHAR szBuf[128];
+
+    TCHAR szSectionName[6];     // セクション名
+    int iCount = 0;             // カウンター
+
+    // INI ファイル名をフルパスで取得
+    if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+        return ERR;
+
+    // エリア情報読み出し
+    for(int i=0; i<MAX_AREA; i++){
+
+        // セクション名作成
+        wsprintf(szSectionName, "Area%d", i);
+
+        // エリア名取得
+        if(GetPrivateProfileString(
+             szSectionName, TEXT("Name"), "",
+             szBuf, sizeof(dtInfo[0].szName), szIniFileName) == 0)
+            continue;
+
+        lstrcpy(dtInfo[iCount].szName, szBuf);
+
+        // X 座標位置取得
+        if(GetPrivateProfileString(
+             szSectionName, TEXT("X"), "0", szBuf, 5, szIniFileName) == 0)
+            continue;
+
+        dtInfo[iCount].x = _tstoi(szBuf);
+
+        // Y 座標位置取得
+        if(GetPrivateProfileString(
+             szSectionName, TEXT("Y"), "0", szBuf, 5, szIniFileName) == 0)
+            continue;
+
+        dtInfo[iCount].y = _tstoi(szBuf);
+
+        // オフセット取得 (必須)
+        if(GetPrivateProfileString(
+             szSectionName, TEXT("Offset"), "0", szBuf, 6, szIniFileName) == 0)
+            return ERR;
+
+        dtInfo[iCount].offset = _tstof(szBuf);
+
+        // オフセット値チェック
+        if(dtInfo[iCount].offset < -12 || dtInfo[iCount].offset > 12)
+            return ERR;
+
+        // ツールチップ情報取得
+        if(GetPrivateProfileString(
+             szSectionName, TEXT("Info"), "",
+             szBuf, sizeof(dtInfo[0].szInfo), szIniFileName) == 0)
+            continue;
+
+        lstrcpy(dtInfo[iCount].szInfo, szBuf);
+
+        // 夏時間開始情報取得
+        if(GetPrivateProfileString(
+            szSectionName, TEXT("DSTStart"), "", szBuf, 12, szIniFileName) != 0){
+
+            // 夏時間情報をエリア情報に格納
+            if(parseDSTInfo(szBuf, &dtInfo[iCount].iDSTStartMonth, &dtInfo[iCount].szDSTStartType,
+                            &dtInfo[iCount].iDSTStartWeekDay, &dtInfo[iCount].iDSTStartTime) != OK)
+                return ERR;
+
+            // 夏時間終了情報取得
+            if(GetPrivateProfileString(
+                szSectionName, TEXT("DSTEnd"), "", szBuf, 12, szIniFileName) != 0){
+
+                // 夏時間情報をエリア情報に格納
+                if(parseDSTInfo(szBuf, &dtInfo[iCount].iDSTEndMonth, &dtInfo[iCount].szDSTEndType,
+                            &dtInfo[iCount].iDSTEndWeekDay, &dtInfo[iCount].iDSTEndTime) != OK)
+                    return ERR;
+
+                dtInfo[iCount].hasDST = true;
+            }
+
+        }else{
+            // 夏時間情報なし
+            dtInfo[iCount].hasDST = false;
+        }
+
+        iCount++;
+    }
+
+    return iCount;
+}
+
+/* 夏時間情報
+   TCHAR* szBuf 入力 (形式: 3/E/0/02:10 月/曜日タイプ/曜日/時刻)
+   int* iMonth 月
+   TCHAR* szType 曜日タイプ
+   int* iWeek 曜日
+   int* iTime 時刻
+   戻り値: OK 成功時 ERR エラー時
+*/
+int WorldTimeConfig::parseDSTInfo(TCHAR* szBuf, int* iMonth, TCHAR* szType, int* iWeek, int* iTime){
+
+    TCHAR* pToken = NULL;
+
+    int iTmp = 0;
+
+    // 月の解析
+    if((pToken = _tcstok(szBuf, "/")) == NULL)
+        return ERR;
+
+    iTmp = _tstoi(pToken);
+
+    // 範囲チェック
+    if(iTmp <= 0 || iTmp > 12)
+        return ERR;
+
+    *iMonth = iTmp;
+
+    // タイプの解析
+    if((pToken = _tcstok(NULL, "/")) == NULL)
+        return ERR;
+
+    // 値チェック
+    if((_tcscmp(pToken, "E") != 0) && (_tcscmp(pToken, "F")))
+        return ERR;
+
+    _tcscpy(szType, pToken);
+
+    // 曜日の解析
+    if((pToken = _tcstok(NULL, "/")) == NULL)
+        return ERR;
+
+    iTmp = _tstoi(pToken);
+
+    // 範囲チェック
+    if(iTmp < 0 || iTmp > 6)
+        return ERR;
+
+    *iWeek = iTmp;
+
+    // 時刻の解析
+    if((pToken = _tcstok(NULL, "/")) == NULL)
+        return ERR;
+
+    // 時の解析
+    if((pToken = _tcstok(pToken, ":")) == NULL)
+        return ERR;
+
+    iTmp = _tstoi(pToken);
+
+    // 時の範囲チェック
+    if(iTmp < 0 || iTmp > 23)
+        return ERR;
+
+    *iTime = iTmp*60;
+
+    // 分の解析
+    if((pToken = _tcstok(NULL, ":")) == NULL)
+        return ERR;
+
+    iTmp = _tstoi(pToken);
+
+    // 分の範囲チェック
+    if(iTmp < 0 || iTmp > 59)
+        return ERR;
+
+    *iTime = *iTime + iTmp;
+
+    return OK;
+}
+
 /* デバッグログ
    char* szBuf デバッグメッセージ
    戻り値: なし
@@ -201,14 +375,7 @@ void WorldTimeConfig::debug(TCHAR* szBuf){
     DWORD dwWritten;
     SYSTEMTIME stTime;
 
-    TCHAR* szLogMsg = (TCHAR*)HeapAlloc(GetProcessHeap(),
-                                      0, sizeof(TCHAR)*lstrlen(szBuf) + 20);
-
-    if(szLogMsg == NULL){
-        MessageBox(0, TEXT("debug() ヒープ確保エラー"),
-                      TEXT("エラー"), MB_ICONSTOP);
-        return;
-    }
+    TCHAR szLogMsg[1024];
 
     GetLocalTime(&stTime);
 
@@ -223,7 +390,6 @@ void WorldTimeConfig::debug(TCHAR* szBuf){
     if (hFile == INVALID_HANDLE_VALUE){
         MessageBox(0, TEXT("ファイルオープンエラー"),
                       TEXT("エラー"), MB_ICONSTOP);
-        goto lblHeapFree;
     }
 
     // ファイル最終端にポインタを移動
@@ -233,9 +399,6 @@ void WorldTimeConfig::debug(TCHAR* szBuf){
     bRet = WriteFile(hFile, szLogMsg, (DWORD)strlen(szLogMsg), &dwWritten, NULL);
 
     CloseHandle(hFile);
-
-lblHeapFree:
-    HeapFree(GetProcessHeap(), 0, szLogMsg);
 }
 
 #endif /* __DEBUG__ */

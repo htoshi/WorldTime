@@ -2,7 +2,7 @@
  * 世界の時間を取得
  *  $Id$
  *
- * Copyright (C) 2004, Toshi All rights reserved.
+ * Copyright (C) 2005, Toshi All rights reserved.
 */
 #ifndef __DRAW_WORLDTIME_H__
 #define __DRAW_WORLDTIME_H__
@@ -12,20 +12,10 @@
 
 #include <windows.h>
 #include <commctrl.h>
+#include "WorldTimeConfig.h"    // datetimeinfo_t readAreaInfo()
 #include "WorldTimeCalc.h"
 
 // #define __DEBUG__ 1
-
-/* 日時情報格納構造体 */
-typedef struct {
-    TCHAR szDate[6];   // 日付 (01/01)
-    TCHAR szTime[6];   // 時刻 (12:00)
-    TCHAR szName[5];   // ゾーン名
-    bool isDST;        // 夏時間フラグ (true: 夏時間 false: 標準時間)
-    int x;             // 表示位置 X 座標
-    int y;             // 表示位置 Y 座標
-    TCHAR szInfo[128]; // ツールチップに表示する情報
-} datetimeinfo_t;
 
 /* 世界時刻描画クラス */
 class DrawWorldTime {
@@ -34,9 +24,10 @@ class DrawWorldTime {
         HFONT hFont;            // フォントオブジェクト
         HWND hTool;             // ツールチップハンドル
         TOOLINFO toolInfo;      // ツールチップ情報構造体
+        int iMaxDateTime;       // 日時情報構造体に格納された数
 
         // 日時情報構造体配列
-        datetimeinfo_t mDateTime[8];
+        datetimeinfo_t mDateTime[MAX_AREA];
 
         // 世界時刻計算クラス
         WorldTimeCalc* mWorldTimeCalc;

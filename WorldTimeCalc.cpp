@@ -2,7 +2,7 @@
  * 世界の時間を取得
  *  $Id$
  *
- * Copyright (C) 2004, Toshi All rights reserved.
+ * Copyright (C) 2005, Toshi All rights reserved.
 */
 #include "WorldTimeCalc.h"
 
@@ -31,8 +31,9 @@ int WorldTimeCalc::zeller(int iYear, int iMonth, int iDay){
 }
 
 /* 月の日数を求める
-   int iYear 年
-   int iMonth 月
+    int iYear 年
+    int iMonth 月
+    戻り値: 月の日数
 */
 int WorldTimeCalc::getDayOfMonth(int iYear, int iMonth){
 
@@ -46,45 +47,81 @@ int WorldTimeCalc::getDayOfMonth(int iYear, int iMonth){
     return dayMonth[iMonth-1] ;
 }
 
-/* 月の最初の日曜日を求める
-   int iYear 年
-   int iMonth 月
-   戻り値: 月の最初の日曜日の日付
+/* 基準日より対象日が後にあるかどうかチェックする
+   int iBaseMonth 基準月
+   int iBaseDay 基準日
+   int iMonth 対象月
+   int iDay 対象日
+   戻り値: 1 後にある場合 0 同一 -1 前にある場合
 */
-int WorldTimeCalc::getMonthFirstSunday(int iYear, int iMonth){
+int WorldTimeCalc::isDateAfterSpecifiedDate(int iBaseMonth, int iBaseDay, int iMonth, int iDay){
 
-    // 1日の曜日を求める
-    int iDayWeek = zeller(iYear, iMonth, 1);
-
-    // 1日が最初の日曜日
-    if(iDayWeek == 0)
+    if(iBaseMonth < iMonth){
+        // 基準日よりも後
         return 1;
-
-    return (8-iDayWeek);
-}
-
-/* 月の最後の日曜日を求める
-   int iYear 年
-   int iMonth 月
-   戻り値: 月の最後の日曜日の日付
-*/
-int WorldTimeCalc::getMonthLastSunday(int iYear, int iMonth){
-
-    int iDayWeek;
-
-    if(iMonth == 12){
-        // 12月の場合は翌年1月1日の曜日を求める
-        iDayWeek = zeller(iYear+1, 1, 1);
-    }else{
-        // 翌月1日の曜日を求める
-        iDayWeek = zeller(iYear, iMonth+1, 1);
+    }else if(iBaseMonth > iMonth){
+        // 基準日よりも前
+        return -1;
     }
 
-    // 翌月1日が日曜日なので月末の 6 日前が日曜日
-    if(iDayWeek == 0)
-        return getDayOfMonth(iYear, iMonth) - 6;
+    if(iBaseDay < iDay){
+        // 基準日よりも後
+        return 1;
+    }else if(iBaseDay > iDay){
+        // 基準日よりも前
+        return -1;
+    }
 
-    return (getDayOfMonth(iYear, iMonth) + 1 - iDayWeek);
+    return 0;
+}
+
+/* 月の最初のN曜日の日付を求める
+   int iYear 年
+   int iMonth 月
+   int iWeekDay N曜日 (0 日曜日～6 土曜日)
+   戻り値: 月の最初のN曜日の日付
+*/
+int WorldTimeCalc::getMonthFirstWeekDay(int iYear, int iMonth, int iWeekDay){
+
+    // 1日の曜日を求める
+    int iWeek = zeller(iYear, iMonth, 1);
+
+    // 1日が最初のN曜日
+    if(iWeek == iWeekDay)
+        return 1;
+
+    // (N+1)曜日から1日の曜日を引いたものが求める日付
+    int iRet = iWeekDay + 1 - iWeek;
+
+    // 0以下の場合は7を足す
+    if(iRet <= 0)
+        iRet = iRet + 7;
+
+    return iRet;
+}
+
+/* 月の最後のN曜日の日付を求める
+   int iYear 年
+   int iMonth 月
+   int iWeekDay N曜日 (0 日曜日～6 土曜日)
+   戻り値: 月の最後のN曜日の日付
+*/
+int WorldTimeCalc::getMonthLastWeekDay(int iYear, int iMonth, int iWeekDay){
+
+    // 月の最後の日を求める
+    int iMonthLastDay = getDayOfMonth(iYear, iMonth);
+
+    // 月の最後の日の曜日を求める
+    int iWeek = zeller(iYear, iMonth, iMonthLastDay);
+
+    // N曜日から月の最後の日の曜日を引いた値を求める
+    int iRet = iWeekDay - iWeek ;
+
+    // 0より大きい場合は7を引く
+    if(iRet > 0)
+        iRet = iRet - 7;
+
+    return (iMonthLastDay + iRet);
 }
 
 /* ある日付が指定された日付の範囲内にあるか
@@ -132,6 +169,7 @@ bool WorldTimeCalc::isDataInSpecifiedRange(int iMonth, int iDay,
 /* datetime_t を与えて任意の時差を与えた時の日付と時刻を得る
     datetime_t* dt  日付時刻構造体
     int iOffsetMin  オフセット(分)
+    戻り値: OK
 */
 int WorldTimeCalc::getDateTimeByOffset(datetime_t* dt, int iOffsetMin){
 
@@ -197,6 +235,7 @@ int WorldTimeCalc::getDateTimeByOffset(datetime_t* dt, int iOffsetMin){
 /* 1日の中で累積分を求める
     int iHour 時
     int iMin 分
+    戻り値: 1日の中での累積分
 */
 int WorldTimeCalc::getTotalMinutesInDay(int iHour, int iMin){
 
@@ -205,6 +244,7 @@ int WorldTimeCalc::getTotalMinutesInDay(int iHour, int iMin){
 
 /* 現在のGMT時刻を取得 (グリニッジ標準時)
     datetime_t* dt  日付時刻構造体
+    戻り値: OK
 */
 int WorldTimeCalc::getCurrentGMT(datetime_t* dt){
 
@@ -224,32 +264,41 @@ int WorldTimeCalc::getCurrentGMT(datetime_t* dt){
     return OK;
 }
 
-/* JST時刻を取得 (日本標準時)
-    datetime_t* dt  日付時刻構造体・変換結果
-    datetime_t* dt_in  日付時刻構造体・入力値(GMT)
+/* DST 日付を設定
+    dstinfo_t* dstInfo 夏時間情報構造体
+    int iYear 年
+    戻り値: OK
 */
-int WorldTimeCalc::getJST(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::setDSTDay(dstinfo_t* dstInfo, int iYear){
 
-    // 入力値をセット
-    dt->Year = dt_in->Year;
-    dt->Month = dt_in->Month;
-    dt->Day = dt_in->Day;
-    dt->Hour = dt_in->Hour;
-    dt->Minute = dt_in->Minute;
-    dt->Second = dt_in->Second;
-    dt->isDST = false;
+    // 月の第一週の曜日の日付を設定
+    if(dstInfo->Type == 'F'){
 
-    // JST = GMT + 9 (+540min)
-    getDateTimeByOffset(dt, 540);
+        dstInfo->Day = getMonthFirstWeekDay(iYear,
+            dstInfo->Month, dstInfo->WeekDay);
+
+    // 月の最終週の曜日の日付を設定
+    }else if(dstInfo->Type == 'E'){
+
+        dstInfo->Day = getMonthLastWeekDay(iYear,
+            dstInfo->Month, dstInfo->WeekDay);
+    }
 
     return OK;
 }
 
-/* AEST時刻を取得 (豪州東部標準時)
+/* 世界の任意時差・指定されたサマータイムで時刻を取得
     datetime_t* dt  日付時刻構造体・変換結果
     datetime_t* dt_in  日付時刻構造体・入力値(GMT)
+    double offset オフセット (時間)
+    bool hasDST 夏時間保持フラグ (true: 夏時間あり false: 夏時間なし)
+    dstinfo_t* dstStart 夏時間開始情報
+    dstinfo_t* dstEnd 夏時間終了情報
+    bool* isDST 夏時間フラグ (true: 夏時間 false: 標準時間)
+    戻り値: OK
 */
-int WorldTimeCalc::getAEST(datetime_t* dt, datetime_t* dt_in){
+int WorldTimeCalc::getWorldTime(datetime_t* dt, datetime_t* dt_in, double offset,
+        bool hasDST, dstinfo_t* dstStart, dstinfo_t* dstEnd){
 
     // 入力値をセット
     dt->Year = dt_in->Year;
@@ -260,319 +309,84 @@ int WorldTimeCalc::getAEST(datetime_t* dt, datetime_t* dt_in){
     dt->Second = dt_in->Second;
     dt->isDST = false;
 
-    // AEST = GMT + 10 (+600min)
-    getDateTimeByOffset(dt, 600);
+    // オフセット補正
+    getDateTimeByOffset(dt, (int)offset*60);
 
-    // 3月の最終日曜日を取得
-    int iMarchLastSundayDay = getMonthLastSunday(dt->Year, 3);
-
-    // 10月の最終日曜日を取得
-    int iOctoberLastSundayDay = getMonthLastSunday(dt->Year, 10);
-
-    // 3月の最終日曜日の翌日～10月の最終日曜日の前日の場合
-    if(isDataInSpecifiedRange(dt->Month, dt->Day,
-        3, iMarchLastSundayDay, 10, iOctoberLastSundayDay, false)){
-
-        return OK;    // サマータイムではない
-    }
-
-    // 3月の最終日曜日の場合 (03:00 にサマータイム終了)
-    if(dt->Month == 3 && dt->Day == iMarchLastSundayDay){
-
-        // 現地標準時で 02:00 より後はサマータイムではない
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) >= 120)
-            return OK;
-    }
-
-    // 10月の最終日曜日の場合 (02:00 にサマータイム開始)
-    if(dt->Month == 10 && dt->Day == iOctoberLastSundayDay){
-
-        // 現地標準時で 02:00 より前はサマータイムではない
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) < 120)
-            return OK;
-    }
-
-    // サマータイム補正 (+60min)
-    getDateTimeByOffset(dt, 60);
-    dt->isDST = true;
-
-    return OK;
-}
-
-/* AWST時刻を取得 (豪州西部標準時)
-    datetime_t* dt  日付時刻構造体・変換結果
-    datetime_t* dt_in  日付時刻構造体・入力値(GMT)
-*/
-int WorldTimeCalc::getAWST(datetime_t* dt, datetime_t* dt_in){
-
-    // 入力値をセット
-    dt->Year = dt_in->Year;
-    dt->Month = dt_in->Month;
-    dt->Day = dt_in->Day;
-    dt->Hour = dt_in->Hour;
-    dt->Minute = dt_in->Minute;
-    dt->Second = dt_in->Second;
+    // 夏時間フラグ
     dt->isDST = false;
 
-    // AWST = GMT + 8 (+480min)
-    getDateTimeByOffset(dt, 480);
+    // 夏時間情報なし
+    if(!hasDST)
+        return OK;
 
-    return OK;
-}
+    // DST 日付を設定
+    setDSTDay(dstStart, dt->Year);
+    setDSTDay(dstEnd, dt->Year);
 
-/* PST時刻を取得 (太平洋標準時)
-    datetime_t* dt  日付時刻構造体・変換結果
-    datetime_t* dt_in  日付時刻構造体・入力値(GMT)
-*/
-int WorldTimeCalc::getPST(datetime_t* dt, datetime_t* dt_in){
+    // 1年中でサマータイム開始日が終了日よりも前にある(北半球)
+    if(isDateAfterSpecifiedDate(dstStart->Month, dstStart->Day, dstEnd->Month, dstEnd->Day) > 0){
 
-    // 入力値をセット
-    dt->Year = dt_in->Year;
-    dt->Month = dt_in->Month;
-    dt->Day = dt_in->Day;
-    dt->Hour = dt_in->Hour;
-    dt->Minute = dt_in->Minute;
-    dt->Second = dt_in->Second;
-    dt->isDST = false;
+        // サマータイム開始日の翌日～サマータイム終了日の前日
+        if(isDataInSpecifiedRange(dt->Month, dt->Day,
+            dstStart->Month, dstStart->Day, dstEnd->Month, dstEnd->Day, false)){
 
-    // PST = GMT - 8 (-480min)
-    getDateTimeByOffset(dt, -480);
-
-    // 4月の最初の日曜日を取得
-    int iAprilFirstSundayDay = getMonthFirstSunday(dt->Year, 4);
-
-    // 10月の最終日曜日を取得
-    int iOctoberLastSundayDay = getMonthLastSunday(dt->Year, 10);
-
-    // 4月の最初の日曜日の翌日～10月の最終日曜日の前日
-    if(isDataInSpecifiedRange(dt->Month, dt->Day,
-        4, iAprilFirstSundayDay, 10, iOctoberLastSundayDay, false)){
-
-            // サマータイム補正
-            goto lblSummerTime;
-    }
-
-    // 4月の最終日曜日の場合 (02:00 にサマータイム開始)
-    if(dt->Month == 4 && dt->Day == iAprilFirstSundayDay){
-
-        // 現地標準時で 02:00 より後はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) >= 120){
-
-            // サマータイム補正
-            goto lblSummerTime;
+                // サマータイム補正
+                goto lblSummerTime;
         }
-    }
 
-    // 10月の最終日曜日の場合 (01:00 にサマータイム終了)
-    if(dt->Month == 10 && dt->Day == iOctoberLastSundayDay){
+        // サマータイム開始日の場合 (dstStart->Time にサマータイム開始)
+        if(dt->Month == dstStart->Month && dt->Day == dstStart->Day){
 
-        // 現地標準時で 01:00 より前はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) < 60){
+            // 現地標準時で dstStart->Time より後はサマータイム
+            if(getTotalMinutesInDay(dt->Hour, dt->Minute) >= dstStart->Time){
 
-            // サマータイム補正
-            goto lblSummerTime;
+                // サマータイム補正
+                goto lblSummerTime;
+            }
         }
-    }
 
-    // サマータイムではない
-    return OK;
+        // サマータイム終了日の場合 (dstEnd->Time にサマータイム終了)
+        if(dt->Month == dstEnd->Month && dt->Day == dstEnd->Day){
 
-lblSummerTime:
-    // サマータイム補正 (+60min)
-    getDateTimeByOffset(dt, 60);
-    dt->isDST = true;
+            // 現地標準時で dstEnd->Time より前はサマータイム
+            if(getTotalMinutesInDay(dt->Hour, dt->Minute) < dstEnd->Time){
 
-    return OK;
-}
-
-/* EST時刻を取得 (東部標準時)
-    datetime_t* dt  日付時刻構造体・変換結果
-    datetime_t* dt_in  日付時刻構造体・入力値(GMT)
-*/
-int WorldTimeCalc::getEST(datetime_t* dt, datetime_t* dt_in){
-
-    // 入力値をセット
-    dt->Year = dt_in->Year;
-    dt->Month = dt_in->Month;
-    dt->Day = dt_in->Day;
-    dt->Hour = dt_in->Hour;
-    dt->Minute = dt_in->Minute;
-    dt->Second = dt_in->Second;
-    dt->isDST = false;
-
-    dt->isDST = false;
-
-    // PST = GMT - 5 (-300min)
-    getDateTimeByOffset(dt, -300);
-
-    // 4月の最初の日曜日を取得
-    int iAprilFirstSundayDay = getMonthFirstSunday(dt->Year, 4);
-
-    // 10月の最終日曜日を取得
-    int iOctoberLastSundayDay = getMonthLastSunday(dt->Year, 10);
-
-    // 4月の最初の日曜日の翌日～10月の最終日曜日の前日
-    if(isDataInSpecifiedRange(dt->Month, dt->Day,
-        4, iAprilFirstSundayDay, 10, iOctoberLastSundayDay, false)){
-
-            // サマータイム補正
-            goto lblSummerTime;
-    }
-
-    // 4月の最初の日曜日の場合 (02:00 にサマータイム開始)
-    if(dt->Month == 4 && dt->Day == iAprilFirstSundayDay){
-
-        // 現地標準時で 02:00 より後はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) >= 120){
-
-            // サマータイム補正
-            goto lblSummerTime;
+                // サマータイム補正
+                goto lblSummerTime;
+            }
         }
-    }
 
-    // 10月の最終日曜日の場合 (01:00 にサマータイム終了)
-    if(dt->Month == 10 && dt->Day == iOctoberLastSundayDay){
+        // サマータイムではない
+        return OK;
 
-        // 現地標準時で 01:00 より前はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) < 60){
+    // 1年中でサマータイム開始日が終了日よりも後にある(南半球)
+    }else{
 
-            // サマータイム補正
-            goto lblSummerTime;
+        // サマータイム終了日の翌日～サマータイム開始日の前日の場合
+        if(isDataInSpecifiedRange(dt->Month, dt->Day,
+            dstEnd->Month, dstEnd->Day, dstStart->Month, dstStart->Day, false)){
+
+            return OK;    // サマータイムではない
         }
-    }
 
-    // サマータイムではない
-    return OK;
+        // サマータイム終了日の場合 (dstEnd->Time にサマータイム終了)
+        if(dt->Month == dstEnd->Month && dt->Day == dstEnd->Day){
 
-lblSummerTime:
-    // サマータイム補正 (+60min)
-    getDateTimeByOffset(dt, 60);
-    dt->isDST = true;
-
-    return OK;
-}
-
-/* CET時刻を取得 (中央ヨーロッパ標準時・ドイツ)
-    datetime_t* dt  日付時刻構造体・変換結果
-    datetime_t* dt_in  日付時刻構造体・入力値(GMT)
-*/
-int WorldTimeCalc::getCET(datetime_t* dt, datetime_t* dt_in){
-
-    // 入力値をセット
-    dt->Year = dt_in->Year;
-    dt->Month = dt_in->Month;
-    dt->Day = dt_in->Day;
-    dt->Hour = dt_in->Hour;
-    dt->Minute = dt_in->Minute;
-    dt->Second = dt_in->Second;
-    dt->isDST = false;
-
-    // CET = GMT + 1 (+60min)
-    getDateTimeByOffset(dt, 60);
-
-    // 3月の最終日曜日を取得
-    int iMarchLastSundayDay = getMonthLastSunday(dt->Year, 3);
-
-    // 10月の最終日曜日を取得
-    int iOctoberLastSundayDay = getMonthLastSunday(dt->Year, 10);
-
-    // 3月の最終日曜日の翌日～10月の最終日曜日の前日
-    if(isDataInSpecifiedRange(dt->Month, dt->Day,
-        3, iMarchLastSundayDay, 10, iOctoberLastSundayDay, false)){
-
-            // サマータイム補正
-            goto lblSummerTime;
-    }
-
-    // 3月の最終日曜日の場合 (02:00 にサマータイム開始)
-    if(dt->Month == 3 && dt->Day == iMarchLastSundayDay){
-
-        // 現地標準時で 02:00 より後はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) >= 120){
-
-            // サマータイム補正
-            goto lblSummerTime;
+            // 現地標準時で dstEnd->Time より後はサマータイムではない
+            if(getTotalMinutesInDay(dt->Hour, dt->Minute) >= dstEnd->Time)
+                return OK;
         }
-    }
 
-    // 10月の最終日曜日の場合 (01:00 にサマータイム終了)
-    if(dt->Month == 10 && dt->Day == iOctoberLastSundayDay){
+        // サマータイム開始日の場合 (dstStart->Time にサマータイム開始)
+        if(dt->Month == dstStart->Month && dt->Day == dstStart->Day){
 
-        // 現地標準時で 01:00 より前はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) < 60){
-
-            // サマータイム補正
-            goto lblSummerTime;
+            // 現地標準時で dstStart->Time より前はサマータイムではない
+            if(getTotalMinutesInDay(dt->Hour, dt->Minute) < dstStart->Time)
+                return OK;
         }
+
+        // それ以外はサマータイム
     }
-
-    // サマータイムではない
-    return OK;
-
-lblSummerTime:
-    // サマータイム補正 (+60min)
-    getDateTimeByOffset(dt, 60);
-    dt->isDST = true;
-
-    return OK;
-}
-
-/* MSK時刻を取得 (モスクワ標準時)
-    datetime_t* dt  日付時刻構造体・変換結果
-    datetime_t* dt_in  日付時刻構造体・入力値(GMT)
-*/
-int WorldTimeCalc::getMSK(datetime_t* dt, datetime_t* dt_in){
-
-    // 入力値をセット
-    dt->Year = dt_in->Year;
-    dt->Month = dt_in->Month;
-    dt->Day = dt_in->Day;
-    dt->Hour = dt_in->Hour;
-    dt->Minute = dt_in->Minute;
-    dt->Second = dt_in->Second;
-    dt->isDST = false;
-
-    // MSK = GMT + 3 (+180min)
-    getDateTimeByOffset(dt, 180);
-
-    // 3月の最終日曜日を取得
-    int iMarchLastSundayDay = getMonthLastSunday(dt->Year, 3);
-
-    // 10月の最終日曜日を取得
-    int iOctoberLastSundayDay = getMonthLastSunday(dt->Year, 10);
-
-    // 3月の最終日曜日の翌日～10月の最終日曜日の前日
-    if(isDataInSpecifiedRange(dt->Month, dt->Day,
-        3, iMarchLastSundayDay, 10, iOctoberLastSundayDay, false)){
-
-            // サマータイム補正
-            goto lblSummerTime;
-    }
-
-    // 3月の最終日曜日の場合 (02:00 にサマータイム開始)
-    if(dt->Month == 3 && dt->Day == iMarchLastSundayDay){
-
-        // 現地標準時で 02:00 より後はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) >= 120){
-
-            // サマータイム補正
-            goto lblSummerTime;
-        }
-    }
-
-    // 10月の最終日曜日の場合 (02:00 にサマータイム終了)
-    if(dt->Month == 10 && dt->Day == iOctoberLastSundayDay){
-
-        // 現地標準時で 02:00 より前はサマータイム
-        if(getTotalMinutesInDay(dt->Hour, dt->Minute) < 120){
-
-            // サマータイム補正
-            goto lblSummerTime;
-        }
-    }
-
-    // サマータイムではない
-    return OK;
 
 lblSummerTime:
     // サマータイム補正 (+60min)
