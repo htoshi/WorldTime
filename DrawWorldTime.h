@@ -38,6 +38,9 @@ class DrawWorldTime {
         // ツールチップをアクティベート
         void activateToolTip(TCHAR*);
 
+        // タイムゾーン名を分割して取得
+        int splitTZName(TCHAR*, TCHAR*, TCHAR*);
+
 #ifdef __DEBUG__
         void debug(TCHAR*);
 #endif

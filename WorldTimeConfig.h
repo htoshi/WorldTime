@@ -29,7 +29,7 @@
 typedef struct {
     TCHAR szDate[6];        // 日付 (01/01)
     TCHAR szTime[6];        // 時刻 (12:00)
-    TCHAR szName[5];        // ゾーン名
+    TCHAR szName[10];       // ゾーン名
     bool isDST;             // 夏時間フラグ (true: 夏時間 false: 標準時間)
     int x;                  // 表示位置 X 座標
     int y;                  // 表示位置 Y 座標
