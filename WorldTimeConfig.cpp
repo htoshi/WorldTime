@@ -315,8 +315,9 @@ int WorldTimeConfig::parseDSTInfo(TCHAR* szBuf, int* iMonth, TCHAR* szType, int*
     if((pToken = _tcstok(NULL, "/")) == NULL)
         return ERR;
 
-    // 値チェック
-    if((_tcscmp(pToken, "E") != 0) && (_tcscmp(pToken, "F")))
+    // 値チェック (E でも F でもなく 1～5 以外の範囲が指定)
+    if((_tcscmp(pToken, "E") != 0) && (_tcscmp(pToken, "F") != 0) &&
+	   (_tstoi(pToken) < 1 || _tstoi(pToken) > 5))
         return ERR;
 
     _tcscpy(szType, pToken);

@@ -8,6 +8,7 @@
 #define __WORLDTIMECALC_H__
 
 #include <windows.h>
+#include <tchar.h>
 
 #define OK 0
 #define ERR -1
@@ -28,7 +29,7 @@ typedef struct {
 typedef struct {
     short Month;    // Œ
     short Day;      // “ú
-    char Type;      // —j“úƒ^ƒCƒv (F: ‘æˆêT E: ÅIT)
+    char Type;      // —j“úƒ^ƒCƒv (F: ‘æˆêT E: ÅIT 1`5: ‘æNT)
     short WeekDay;  // —j“ú (0:“ú—j“ú`6:“y—j“ú)
     short Time;     // (•ª)
 } dstinfo_t;
@@ -55,6 +56,9 @@ class WorldTimeCalc {
 
         // Œ‚ÌÅŒã‚ÌN—j“ú‚Ì“ú•t‚ğ‹‚ß‚é
         int getMonthLastWeekDay(int, int, int);
+
+		// Œ‚Ì‘æM N—j“ú‚Ì“ú•t‚ğ‹‚ß‚é
+		int getMonthMWeekDay(int, int, int, int);
 
         // Šî€“ú‚æ‚è‘ÎÛ“ú‚ªŒã‚É‚ ‚é‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN‚·‚é
         int isDateAfterSpecifiedDate(int, int, int, int);

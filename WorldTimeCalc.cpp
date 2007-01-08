@@ -124,6 +124,28 @@ int WorldTimeCalc::getMonthLastWeekDay(int iYear, int iMonth, int iWeekDay){
     return (iMonthLastDay + iRet);
 }
 
+/* ŒŽ‚Ì‘æM N—j“ú‚Ì“ú•t‚ð‹‚ß‚é
+   int iYear ”N
+   int iMonth ŒŽ
+   int iNum ‘æ M —j“ú‚Ì M ‚ðŽw’è
+   int iWeekDay N—j“ú (0 “ú—j“ú`6 “y—j“ú)
+   –ß‚è’l: ŒŽ‚ÌÅ‰‚ÌN—j“ú‚Ì“ú•t (‘¶Ý‚µ‚È‚¢ê‡‚Í -1)
+*/
+int WorldTimeCalc::getMonthMWeekDay(int iYear, int iMonth, int iNum, int iWeekDay){
+
+    // ŒŽ‚ÌÅ‰‚ÌN—j“ú‚Ì“ú•t‚ð‹‚ß‚é
+    int iDay = getMonthFirstWeekDay(iYear, iMonth, iWeekDay);
+
+    // M”Ô–Ú‚ÌN—j“ú‚Ì“ú•t‚ð‹‚ß‚é
+    iDay = iDay + (iNum - 1)*7;
+
+    // ‘¶Ý‚µ‚È‚¢
+    if(iDay > getDayOfMonth(iYear, iMonth))
+        return -1;
+
+    return iDay;
+}
+
 /* ‚ ‚é“ú•t‚ªŽw’è‚³‚ê‚½“ú•t‚Ì”ÍˆÍ“à‚É‚ ‚é‚©
    int iMonth Žw’èŒŽ
    int iDay Žw’è“ú
@@ -282,7 +304,15 @@ int WorldTimeCalc::setDSTDay(dstinfo_t* dstInfo, int iYear){
 
         dstInfo->Day = getMonthLastWeekDay(iYear,
             dstInfo->Month, dstInfo->WeekDay);
-    }
+
+	// ŒŽ‚Ì‘æM N—j“ú‚Ì“ú•t‚ðÝ’è
+	}else{
+		int iNum = _tstoi(&(dstInfo->Type));
+		if(iNum >= 1 && iNum <= 5){
+			dstInfo->Day = getMonthMWeekDay(iYear,
+            dstInfo->Month, iNum, dstInfo->WeekDay);
+		}
+	}
 
     return OK;
 }
