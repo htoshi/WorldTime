@@ -340,7 +340,7 @@ int WorldTimeCalc::getWorldTime(datetime_t* dt, datetime_t* dt_in, double offset
     dt->isDST = false;
 
     // オフセット補正
-    getDateTimeByOffset(dt, (int)offset*60);
+    getDateTimeByOffset(dt, (int)(offset*60));
 
     // 夏時間フラグ
     dt->isDST = false;
