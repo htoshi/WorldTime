@@ -1,2 +1,312 @@
-WORLDMAP BITMAP "worldmap.bmp"
-WORLDICO ICON DISCARDABLE "WorldTime.ico"
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "atlres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""atlres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST ""res\\\\WorldTime.exe.manifest""\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\WorldTime.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 193, 80
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "バージョン情報"
+FONT 9, "ＭＳ ゴシック", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "O&K",IDOK,136,59,50,14
+    CTEXT           "世界時計 v1.0\n(c) Copyright 2011 Toshi",IDC_STATIC,11,
+                    50,105,21
+    ICON            IDR_MAINFRAME,IDC_STATIC,59,22,20,20
+    GROUPBOX        "",IDC_STATIC,7,7,117,63
+END
+
+IDD_MAINDLG DIALOGEX 0, 0, 240, 146
+STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU
+CAPTION "世界時計"
+CLASS "C9132D07-D564-4506-99AB-AE118B6FBB77"
+FONT 9, "ＭＳ ゴシック", 0, 0, 0x0
+BEGIN
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 186
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 73
+    END
+
+    IDD_MAINDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 229
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 134
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104b0"
+        BEGIN
+            VALUE "FileDescription", "世界時計"
+            VALUE "FileVersion", "1, 0, 0, 0"
+            VALUE "InternalName", "WorldTime"
+            VALUE "LegalCopyright", "Copyright 2011 Toshi"
+            VALUE "OriginalFilename", "WorldTime.exe"
+            VALUE "ProductName", "WorldTime Module"
+            VALUE "ProductVersion", "1, 0, 0, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_WORLDMAP            BITMAP                  "world.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_RMENU MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "ツールチップを表示(&I)",      IDM_TOOLTIP
+        MENUITEM "常に手前に表示(&T)",          IDM_ALWAYSTOP
+        POPUP "半透明"
+        BEGIN
+            MENUITEM "100%",                        ID_ALPHA_100
+            MENUITEM "80%",                         ID_ALPHA_80
+            MENUITEM "60%",                         ID_ALPHA_60
+            MENUITEM "40%",                         ID_ALPHA_40
+            MENUITEM "20%",                         ID_ALPHA_20
+        END
+        MENUITEM "シンプルモード",              IDM_SIMPLEMODE
+        MENUITEM "設定ファイルを開く",          IDM_OPEN_INIFILE
+        MENUITEM SEPARATOR
+        MENUITEM "世界時計について(&A)",        IDM_ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "終了(&X)",                    IDM_EXIT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "WorldTime"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "新しいドキュメントを開きます。\n新規"
+    ID_FILE_OPEN            "既存のドキュメントを開きます。\n開く"
+    ID_FILE_CLOSE           "アクティブなドキュメントを閉じます。\n閉じる"
+    ID_FILE_SAVE            "アクティブなドキュメントを保存します。\n保存"
+    ID_FILE_SAVE_AS         "アクティブなドキュメントに名前をつけて保存します。\n名前をつけて保存"
+    ID_FILE_PAGE_SETUP      "印刷オプションを変更します。\nページ設定"
+    ID_FILE_PRINT_SETUP     "プリンタと印刷オプションを変更します。\n印刷設定"
+    ID_FILE_PRINT           "アクティブなドキュメントを印刷します。\n印刷"
+    ID_FILE_PRINT_PREVIEW   "印刷プレビューを全画面で表示します。\nプレビュー"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "バージョン情報や著作権などのアプリケーションの情報を表示します。\nバージョン情報"
+    ID_APP_EXIT             "アプリケーションを終了します; ドキュメントを保存するか確認します。\n終了"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "次のウィンドウペインに切り替えます。\n次のペイン"
+    ID_PREV_PANE            "前のウィンドウペインに切り替えます。\n前のペイン"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "アクティブなドキュメントの複製を新規に開きます。\n新規ウィンドウ"
+    ID_WINDOW_ARRANGE       "アイコンをウィンドウの底部に最小化します。\nアイコンの整列"
+    ID_WINDOW_CASCADE       "ウィンドウを重ねて表示します。\n重ねて表示"
+    ID_WINDOW_TILE_HORZ     "ウィンドウを左右に並べて表示します。\n左右に並べて表示"
+    ID_WINDOW_TILE_VERT     "ウィンドウを上下に並べて表示します。\n上下に並べて表示"
+    ID_WINDOW_SPLIT         "アクティブなウィンドウをペインに分割します。\n分割"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "選択範囲を消去します。\n削除"
+    ID_EDIT_CLEAR_ALL       "すべて消去します。\nすべて削除"
+    ID_EDIT_COPY            "選択範囲をクリップボードにコピーします。\nコピー"
+    ID_EDIT_CUT             "選択範囲をクリップボードに切り取ります。\n切り取り"
+    ID_EDIT_FIND            "指定したテキストを検索します。\n検索"
+    ID_EDIT_PASTE           "クリップボードの中身を貼り付けます。\n貼り付け"
+    ID_EDIT_REPEAT          "最後の動作を繰り返します。\n繰り返し"
+    ID_EDIT_REPLACE         "指定したテキストを別のテキストに置き換えます。\n置換"
+    ID_EDIT_SELECT_ALL      "すべてのドキュメントを選択します。\nすべて選択"
+    ID_EDIT_UNDO            "最後の動作をやり直します。\nやり直し"
+    ID_EDIT_REDO            "直前の未完了など動作を再実行します。\nやり直しのやり直し"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_SCSIZE          "ウィンドウの大きさを変更します。"
+    ATL_IDS_SCMOVE          "ウィンドウの位置を変更します。"
+    ATL_IDS_SCMINIMIZE      "ウィンドウをアイコン化します。"
+    ATL_IDS_SCMAXIMIZE      "ウィンドウを最大化します。"
+    ATL_IDS_SCNEXTWINDOW    "次のドキュメントウィンドウに切り替えます。"
+    ATL_IDS_SCPREVWINDOW    "前のドキュメントウィンドウに切り替えます。"
+    ATL_IDS_SCCLOSE         "アクティブなウィンドウの保存の有無を確認して閉じます。"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_SCRESTORE       "ウィンドウを元の大きさに戻します。"
+    ATL_IDS_SCTASKLIST      "タスク一覧をアクティブにします。"
+    ATL_IDS_MDICHILD        "このウィンドウをアクティブにします。"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_IDLEMESSAGE     "ﾚﾃﾞｨ"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_MRU_FILE        "このドキュメントを開く"
+END
+
+#endif    // 日本語 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "res\\WorldTime.exe.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
