@@ -2,7 +2,7 @@
  * 初期設定ファイルクラス
  * $Id$
  *
- * Copyright (C) 2011, Toshi All rights reserved.
+ * Copyright (C) 2011-2014, Toshi All rights reserved.
 */
 #include "stdafx.h"		// for C1010 error
 #include "Config.h"
@@ -23,16 +23,14 @@ int Config::getIniFileName(TCHAR* szFullPathName, DWORD nSize){
 	TCHAR szDir[MAX_PATHLEN];
 
 	// 実行ファイルのフルパスとファイル名を取得
-	if(!GetModuleFileName(NULL, szFullPathName, nSize))
+	if(!GetModuleFileName(NULL, szFullPathName, nSize*sizeof(TCHAR)))
 		return ERR;
 
 	// フルパスを分解
-	_tsplitpath(szFullPathName, szDrive, szDir, NULL, NULL);
+	_tsplitpath_s(szFullPathName, szDrive, _countof(szDrive), szDir, _countof(szDir), NULL, 0, NULL, 0);
 
 	// szFullPathName に INI ファイル名をフルパスで格納
-	_tcscpy(szFullPathName, szDrive);
-	_tcscat(szFullPathName, szDir);
-	_tcscat(szFullPathName, INIFILENAME);
+	_sntprintf_s(szFullPathName, nSize, _TRUNCATE, L"%s%s%s", szDrive, szDir, INIFILENAME);
 
 	return OK;
 }
@@ -47,7 +45,7 @@ int Config::readWindowRect(RECT* rect){
 	TCHAR szBuf[100];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// Top 位置の取得
@@ -79,7 +77,7 @@ int Config::writeWindowRect(RECT* rect){
 	TCHAR szBuf[100];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// Top 位置の保存
@@ -108,7 +106,7 @@ int Config::readTopMostFlag(bool* isTop){
 	TCHAR szBuf[5];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// 常に最前面表示情報読み出し (1: 常に最前面)
@@ -131,7 +129,7 @@ int Config::writeTopMostFlag(bool isTop){
 	TCHAR szBuf[10];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 	return ERR;
 
 	// 最前面状態の保存
@@ -154,7 +152,7 @@ int Config::readToolTipFlag(bool* isShow){
 	TCHAR szBuf[5];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// ツールチップ表示情報読み出し (1: 表示)
@@ -178,7 +176,7 @@ int Config::writeToolTipFlag(bool isShow){
 	TCHAR szBuf[10];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// ツールチップ表示情報保存
@@ -201,7 +199,7 @@ int Config::readAlpha(int* alpha){
 	TCHAR szBuf[5];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// 透明度読み出し
@@ -230,7 +228,7 @@ int Config::writeAlpha(int alpha){
 	TCHAR szBuf[10];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// 透明度保存
@@ -253,7 +251,7 @@ int Config::readSimpleMode(bool* isTop){
 	TCHAR szBuf[5];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// シンプルモード読み出し (1: シンプルモード)
@@ -276,7 +274,7 @@ int Config::writeSimpleMode(bool isTop){
 	TCHAR szBuf[10];
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 	return ERR;
 
 	// シンプルモードの保存
@@ -302,7 +300,7 @@ int Config::readAreaInfo(datetimeinfo_t dtInfo[]){
 	int iCount = 0;				// カウンター
 
 	// INI ファイル名をフルパスで取得
-	if(getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// エリア情報読み出し
@@ -395,11 +393,12 @@ int Config::readAreaInfo(datetimeinfo_t dtInfo[]){
 int Config::parseDSTInfo(TCHAR* szBuf, int* iMonth, TCHAR* szType, int* iWeek, int* iTime){
 
 	TCHAR* pToken = NULL;
+	TCHAR* pNext = NULL;
 
 	int iTmp = 0;
 
 	// 月の解析
-	if((pToken = _tcstok(szBuf, _T("/"))) == NULL)
+	if((pToken = _tcstok_s(szBuf, _T("/"), &pNext)) == NULL)
 		return ERR;
 
 	iTmp = _tstoi(pToken);
@@ -411,7 +410,7 @@ int Config::parseDSTInfo(TCHAR* szBuf, int* iMonth, TCHAR* szType, int* iWeek, i
 	*iMonth = iTmp;
 
 	// タイプの解析
-	if((pToken = _tcstok(NULL, _T("/"))) == NULL)
+	if((pToken = _tcstok_s(NULL, _T("/"), &pNext)) == NULL)
 		return ERR;
 
 	// 値チェック (E でも F でもなく 1～5 以外の範囲が指定)
@@ -419,10 +418,10 @@ int Config::parseDSTInfo(TCHAR* szBuf, int* iMonth, TCHAR* szType, int* iWeek, i
 		(_tstoi(pToken) < 1 || _tstoi(pToken) > 5))
 	return ERR;
 
-	_tcscpy(szType, pToken);
+	_tcsncpy_s(szType, sizeof(TCHAR), pToken, _TRUNCATE);
 
 	// 曜日の解析
-	if((pToken = _tcstok(NULL, _T("/"))) == NULL)
+	if((pToken = _tcstok_s(NULL, _T("/"), &pNext)) == NULL)
 		return ERR;
 
 	iTmp = _tstoi(pToken);
@@ -434,11 +433,11 @@ int Config::parseDSTInfo(TCHAR* szBuf, int* iMonth, TCHAR* szType, int* iWeek, i
 	*iWeek = iTmp;
 
 	// 時刻の解析
-	if((pToken = _tcstok(NULL, _T("/"))) == NULL)
+	if((pToken = _tcstok_s(NULL, _T("/"), &pNext)) == NULL)
 		return ERR;
 
 	// 時の解析
-	if((pToken = _tcstok(pToken, _T(":"))) == NULL)
+	if((pToken = _tcstok_s(pToken, _T(":"), &pNext)) == NULL)
 		return ERR;
 
 	iTmp = _tstoi(pToken);
@@ -450,7 +449,7 @@ int Config::parseDSTInfo(TCHAR* szBuf, int* iMonth, TCHAR* szType, int* iWeek, i
 	*iTime = iTmp*60;
 
 	// 分の解析
-	if((pToken = _tcstok(NULL, _T(":"))) == NULL)
+	if((pToken = _tcstok_s(NULL, _T(":"), &pNext)) == NULL)
 		return ERR;
 
 	iTmp = _tstoi(pToken);

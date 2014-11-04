@@ -2,7 +2,7 @@
  * 世界時計ダイアログクラス
  * $Id$
  *
- * Copyright (C) 2011, Toshi All rights reserved.
+ * Copyright (C) 2011-2014, Toshi All rights reserved.
 */
 #pragma once
 
@@ -11,6 +11,8 @@
 #define PI 3.14159265358979323846
 #define D2R(x) PI*x/180.0
 #define R2D(x) x*180.0/PI
+
+#define WM_SYSTEMMENU 0x313
 
 // 定数
 static const double a[5]={0.000075, 0.001868, 0.032077, 0.014615, 0.040849};
@@ -38,6 +40,7 @@ public:
 		MESSAGE_HANDLER(WM_MOUSEMOVE, OnMouseMove)
 		MESSAGE_HANDLER(WM_NCHITTEST, OnNCHITest)
 		MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown)
+		MESSAGE_HANDLER(WM_SYSTEMMENU, OnSystemMenu)
 		MSG_WM_CONTEXTMENU(OnContextMenu)
 		COMMAND_ID_HANDLER(IDM_ABOUT, OnAppAbout)
 		COMMAND_ID_HANDLER(IDM_TOOLTIP, OnToolTip)
@@ -70,6 +73,7 @@ public:
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnMouseMove(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnNCHITest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnSystemMenu(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 
 	LRESULT OnAlpha100(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnAlpha80(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -101,8 +105,9 @@ private:
 	HBITMAP m_BackBmp;
 	HFONT m_font;
 
+	void setWindowPosition(RECT);
 	void setCurrentTime(datetime_t);
-	int splitTZName(TCHAR*, TCHAR*, TCHAR*);
+	int splitTZName(TCHAR*, TCHAR*, size_t, TCHAR*, size_t);
 	void draw(void);
 	void drawText(void);
 	void CloseDialog(int);

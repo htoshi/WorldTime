@@ -2,7 +2,7 @@
  * 世界時計ダイアログクラス
  * $Id$
  *
- * Copyright (C) 2011, Toshi All rights reserved.
+ * Copyright (C) 2011-2014, Toshi All rights reserved.
 */
 #include "stdafx.h"
 #include "resource.h"
@@ -50,9 +50,6 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		delete(m_config);
 		return -1;
 	}
-
-	// 位置を設定
-	SetWindowPos(NULL, Rect.left, Rect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
 	// ポップアップメニュー読み込み
 	m_PopupMenu.LoadMenu(IDR_RMENU);
@@ -121,12 +118,61 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	// インターバル 500ms でタイマーセット
 	SetTimer(IDC_TIMER, 500, NULL);
 
-	// 通常表示
-//	ShowWindow(SW_SHOWNORMAL);
-	SetWindowPos(HWND_TOP, 0, 0, 0, 0,
-			SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_DRAWFRAME | SWP_SHOWWINDOW);
+	// 位置を設定
+	setWindowPosition(Rect);
 
 	return TRUE;
+}
+
+/* 位置を設定
+	戻り値: なし
+*/
+void CMainDlg::setWindowPosition(RECT rect)
+{
+	int left = rect.left;
+	int top = rect.top;
+	int width = 0;
+	int height = 0;
+
+	// モニタ情報取得
+	HMONITOR hMonitor = MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO mi;
+	mi.cbSize = sizeof(MONITORINFO);
+	GetMonitorInfo(hMonitor, &mi);
+
+	int frame_width = 2*GetSystemMetrics(SM_CXFIXEDFRAME);
+
+	// シンプルモード時
+	if(m_simplemode){
+		width = m_bitmap_width;
+		height = m_bitmap_height;
+	}else{
+		width = m_bitmap_width + frame_width;
+		height = m_bitmap_height + GetSystemMetrics(SM_CYCAPTION) + frame_width;
+	}
+
+	// 左側オーバー
+	if(left < mi.rcWork.left){
+		left = mi.rcWork.left;
+	}
+
+	// 右側オーバー
+	if(left > mi.rcWork.right - width){
+		left = mi.rcWork.right - width;
+	}
+
+	// 上側オーバー
+	if(top < mi.rcWork.top){
+		top = mi.rcWork.top;
+	}
+
+	// 下側オーバー
+	if(top > mi.rcWork.bottom - height){
+		top = mi.rcWork.bottom - height;
+	}
+
+	// 通常表示
+	SetWindowPos(HWND_TOP, left, top, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
 /* 終了時処理
@@ -342,7 +388,7 @@ LRESULT CMainDlg::OnOpenInifile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 	TCHAR szIniFileName[MAX_PATHLEN];
 
 	// INI ファイル名をフルパスで取得
-	if(m_config->getIniFileName(szIniFileName, sizeof(szIniFileName)) != OK)
+	if(m_config->getIniFileName(szIniFileName, _countof(szIniFileName)) != OK)
 		return ERR;
 
 	// INI ファイルを開く
@@ -401,7 +447,7 @@ LRESULT CMainDlg::OnSimpleMode(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 	TCHAR szMsg[] = TEXT("アプリケーションを再起動してください");
 
 	SetTextColor(m_WorkDC, RGB(255, 0, 0));
-	TextOut(m_WorkDC, 70, 155, szMsg, _tcslen(szMsg));
+	TextOut(m_WorkDC, 70, 155, szMsg, (int)_tcslen(szMsg));
 	InvalidateRect(NULL, TRUE);
 
 	return 0;
@@ -511,6 +557,22 @@ void CMainDlg::OnContextMenu(HWND hWnd, CPoint pt)
 	}else{
 		SetMsgHandled(false);
 	}
+}
+
+/* タスクバー上でシステムメニュー表示時
+	最小化した状態で正しい位置が保存出来ない
+	戻り値: LRESULT
+*/
+LRESULT CMainDlg::OnSystemMenu(UINT /*uMsg*/, WPARAM /*wParam*/ , LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+	// アイコン化と通常表示を切り替える
+	if(IsIconic()){
+		ShowWindow(SW_RESTORE);
+	}else{
+		ShowWindow(SW_MINIMIZE);
+	}
+
+	return 0;
 }
 
 /* 描画処理
@@ -678,10 +740,12 @@ void CMainDlg::setCurrentTime(datetime_t dtGMT)
 /* タイムゾーン名を分割して取得
 	TCHAR* szNameIn タイムゾーン名 (形式: AEST/AEDT)
 	TCHAR* szST 標準時タイムゾーン名 (出力)
+	size_t szST バッファサイズ
 	TCHAR* szDT 夏時間タイムゾーン名 (出力)
+	size_t szDT バッファサイズ
 	戻り値: OK 成功時 ERR エラー時
 */
-int CMainDlg::splitTZName(TCHAR* szNameIn, TCHAR* szST, TCHAR* szDT)
+int CMainDlg::splitTZName(TCHAR* szNameIn, TCHAR* szST, size_t nST, TCHAR* szDT, size_t nDT)
 {
 	TCHAR* pToken = NULL;
 	size_t iLen = 0;
@@ -692,11 +756,10 @@ int CMainDlg::splitTZName(TCHAR* szNameIn, TCHAR* szST, TCHAR* szDT)
 	}
 
 	iLen = _tcslen(szNameIn) - _tcslen(pToken);
-	_tcsncpy(szST, szNameIn, iLen);
-	*(szST + iLen) = '\0';
+	_tcsncpy_s(szST, nST, szNameIn, iLen);
 
 	// 次のトークン
-	_tcscpy(szDT, pToken+1);
+	_tcsncpy_s(szDT, nDT, pToken+1, _TRUNCATE);
 
 	return OK;
 }
@@ -713,9 +776,9 @@ void CMainDlg::drawText()
 	// それぞれのタイムゾーンの日時を表示
 	for(int i=0; i<m_datetime_number; i++){
 		// タイムゾーン名を分割
-		if(splitTZName(m_datetime[i].szName, szST, szDT) != OK){
-			_tcscpy(szST, m_datetime[i].szName);
-			_tcscpy(szDT, m_datetime[i].szName);
+		if(splitTZName(m_datetime[i].szName, szST, _countof(szST), szDT, _countof(szDT)) != OK){
+			_tcsncpy_s(szST, _countof(szST), m_datetime[i].szName, _TRUNCATE);
+			_tcsncpy_s(szDT, _countof(szDT), m_datetime[i].szName, _TRUNCATE);
 		}
 
 		// 夏時間
