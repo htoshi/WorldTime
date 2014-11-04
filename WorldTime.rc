@@ -64,20 +64,19 @@ IDR_MAINFRAME           ICON                    "res\\WorldTime.ico"
 IDD_ABOUTBOX DIALOGEX 0, 0, 193, 80
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "ÉoÅ[ÉWÉáÉìèÓïÒ"
-FONT 9, "ÇlÇr ÉSÉVÉbÉN", 0, 0, 0x0
+FONT 9, "Meiryo UI", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "O&K",IDOK,136,59,50,14
-    CTEXT           "ê¢äEéûåv v1.0\n(c) Copyright 2011 Toshi",IDC_STATIC,11,
-                    50,105,21
+    CTEXT           "ê¢äEéûåv v1.2\n(c) Copyright 2011-2014 Toshi",IDC_STATIC,5,45,125,21
     ICON            IDR_MAINFRAME,IDC_STATIC,59,22,20,20
-    GROUPBOX        "",IDC_STATIC,7,7,117,63
+    GROUPBOX        "",IDC_STATIC,5,5,127,63
 END
 
 IDD_MAINDLG DIALOGEX 0, 0, 240, 146
 STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU
 CAPTION "ê¢äEéûåv"
 CLASS "C9132D07-D564-4506-99AB-AE118B6FBB77"
-FONT 9, "ÇlÇr ÉSÉVÉbÉN", 0, 0, 0x0
+FONT 9, "Meiryo UI", 0, 0, 0x0
 BEGIN
 END
 
@@ -139,8 +138,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION 1,2,0,0
+ PRODUCTVERSION 1,2,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -156,12 +155,12 @@ BEGIN
         BLOCK "041104b0"
         BEGIN
             VALUE "FileDescription", "ê¢äEéûåv"
-            VALUE "FileVersion", "1, 0, 0, 0"
+            VALUE "FileVersion", "1, 2, 0, 0"
             VALUE "InternalName", "WorldTime"
-            VALUE "LegalCopyright", "Copyright 2011 Toshi"
+            VALUE "LegalCopyright", "Copyright 2011-2014 Toshi"
             VALUE "OriginalFilename", "WorldTime.exe"
             VALUE "ProductName", "WorldTime Module"
-            VALUE "ProductVersion", "1, 0, 0, 0"
+            VALUE "ProductVersion", "1, 2, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
