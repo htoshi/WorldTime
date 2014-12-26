@@ -44,6 +44,7 @@ public:
 		MSG_WM_CONTEXTMENU(OnContextMenu)
 		COMMAND_ID_HANDLER(IDM_ABOUT, OnAppAbout)
 		COMMAND_ID_HANDLER(IDM_TOOLTIP, OnToolTip)
+		COMMAND_ID_HANDLER(IDM_MOVABLE, OnMovable)
 		COMMAND_ID_HANDLER(IDM_ALWAYSTOP, OnAlwaysTop)
 		COMMAND_ID_HANDLER(IDM_SIMPLEMODE, OnSimpleMode)
 		COMMAND_ID_HANDLER(IDM_OPEN_INIFILE, OnOpenInifile)
@@ -64,6 +65,7 @@ public:
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnToolTip(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnMovable(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnAlwaysTop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnSimpleMode(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnOpenInifile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -96,6 +98,7 @@ private:
 	bool m_simplemode;						// シンプルモード
 	int m_bitmap_width;						// ビットマップ幅
 	int m_bitmap_height;					// ビットマップ高さ
+	bool m_movable;							// 移動可フラグ
 
 	// デバイスコンテキスト
 	HDC m_WorkDC;

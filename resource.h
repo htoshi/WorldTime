@@ -12,6 +12,7 @@
 #define IDM_ALWAYSTOP                   32778
 #define IDM_OPEN_INIFILE                32780
 #define IDM_TOOLTIP                     32783
+#define IDM_MOVABLE                     32784
 #define ID_ALPHA_20                     32790
 #define ID_ALPHA_40                     32791
 #define ID_ALPHA_60                     32792

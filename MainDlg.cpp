@@ -61,6 +61,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	setAlwaysTopState(false);	// 常に最前面に表示・メニューチェック状態設定
 	setAlpha(m_alpha);			// 透過設定
 	setSimpleMode();			// シンプルモード(タイトルバー・枠・タスクバーアイコン非表示)
+	m_movable = false;			// 移動不可
 
 	// set icons
 	HICON hIcon = (HICON)::LoadImage(_Module.GetResourceInstance(), MAKEINTRESOURCE(IDR_MAINFRAME),
@@ -331,6 +332,29 @@ LRESULT CMainDlg::OnToolTip(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/
 	return 0;
 }
 
+/* 移動・メニュー選択時
+	戻り値: LRESULT
+*/
+LRESULT CMainDlg::OnMovable(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	MENUITEMINFO menuInfo;
+
+	menuInfo.cbSize = sizeof(MENUITEMINFO);
+	menuInfo.fMask = MIIM_STATE;
+
+	if(m_movable == 0){
+		menuInfo.fState = MFS_CHECKED;
+		m_movable = 1;
+	}else{
+		menuInfo.fState = MFS_UNCHECKED;
+		m_movable = 0;
+	}
+
+	m_PopupMenu.SetMenuItemInfo(IDM_MOVABLE, FALSE, &menuInfo);
+
+	return 0;
+}
+
 /* 常に手前に表示・メニュー状態を設定
 	toggle: 状態をトグル
 */
@@ -402,9 +426,10 @@ LRESULT CMainDlg::OnOpenInifile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 */
 void CMainDlg::setSimpleMode()
 {
+	MENUITEMINFO menuInfo;
+	menuInfo.cbSize = sizeof(MENUITEMINFO);
+
 	if(m_simplemode){
-		MENUITEMINFO menuInfo;
-		menuInfo.cbSize = sizeof(MENUITEMINFO);
 		menuInfo.fMask = MIIM_STRING;
 
 		TCHAR szBuf[] = TEXT("通常モード");
@@ -417,6 +442,11 @@ void CMainDlg::setSimpleMode()
 		LONG style = GetWindowLong(GWL_EXSTYLE);
 		SetWindowLong(GWL_EXSTYLE, style | WS_EX_TOOLWINDOW);
 		SetWindowLong(GWL_STYLE, WS_POPUP);
+	}else{
+		// 通常モード時は移動メニューを無効
+		menuInfo.fMask = MIIM_STATE;
+		menuInfo.fState = MFS_DISABLED;
+		m_PopupMenu.SetMenuItemInfo(IDM_MOVABLE, FALSE, &menuInfo);
 	}
 }
 
@@ -447,7 +477,7 @@ LRESULT CMainDlg::OnSimpleMode(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 	TCHAR szMsg[] = TEXT("アプリケーションを再起動してください");
 
 	SetTextColor(m_WorkDC, RGB(255, 0, 0));
-	TextOut(m_WorkDC, 70, 155, szMsg, (int)_tcslen(szMsg));
+	TextOut(m_WorkDC, 70, 5, szMsg, (int)_tcslen(szMsg));
 	InvalidateRect(NULL, TRUE);
 
 	return 0;
@@ -461,6 +491,10 @@ LRESULT CMainDlg::OnNCHITest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHan
 	LRESULT lr = ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 
 	bHandled = false;
+
+	if(!m_movable){
+		return 0;
+	}
 
 	// 左ボタンが押された時
 	if(GetAsyncKeyState(VK_LBUTTON) < 0){

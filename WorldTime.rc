@@ -67,7 +67,7 @@ CAPTION "バージョン情報"
 FONT 9, "Meiryo UI", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "O&K",IDOK,136,59,50,14
-    CTEXT           "世界時計 v1.2\n(c) Copyright 2011-2014 Toshi",IDC_STATIC,5,45,125,21
+    CTEXT           "世界時計 v1.3\n(c) Copyright 2011-2014 Toshi",IDC_STATIC,5,45,125,21
     ICON            IDR_MAINFRAME,IDC_STATIC,59,22,20,20
     GROUPBOX        "",IDC_STATIC,5,5,127,63
 END
@@ -138,8 +138,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,2,0,0
- PRODUCTVERSION 1,2,0,0
+ FILEVERSION 1,3,0,0
+ PRODUCTVERSION 1,3,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -155,12 +155,12 @@ BEGIN
         BLOCK "041104b0"
         BEGIN
             VALUE "FileDescription", "世界時計"
-            VALUE "FileVersion", "1, 2, 0, 0"
+            VALUE "FileVersion", "1, 3, 0, 0"
             VALUE "InternalName", "WorldTime"
             VALUE "LegalCopyright", "Copyright 2011-2014 Toshi"
             VALUE "OriginalFilename", "WorldTime.exe"
             VALUE "ProductName", "WorldTime Module"
-            VALUE "ProductVersion", "1, 2, 0, 0"
+            VALUE "ProductVersion", "1, 3, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -186,6 +186,7 @@ IDR_RMENU MENU
 BEGIN
     POPUP ""
     BEGIN
+        MENUITEM "移動(&M)",                    IDM_MOVABLE
         MENUITEM "ツールチップを表示(&I)",      IDM_TOOLTIP
         MENUITEM "常に手前に表示(&T)",          IDM_ALWAYSTOP
         POPUP "半透明"
