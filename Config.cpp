@@ -54,7 +54,7 @@ int Config::readWindowRect(RECT* rect){
 		szBuf, sizeof(szBuf), szIniFileName) == 0)
 		return ERR;
 
-	rect->top = (_tstol(szBuf) == 0)?_tstol(DEFAULT_WINDOW_TOP):_tstol(szBuf);
+	rect->top = (_tstol(szBuf) < 0)?_tstol(DEFAULT_WINDOW_TOP):_tstol(szBuf);
 
 	// Left ˆÊ’u‚ÌŽæ“¾
 	if(GetPrivateProfileString(
@@ -62,7 +62,11 @@ int Config::readWindowRect(RECT* rect){
 	szBuf, sizeof(szBuf), szIniFileName) == 0)
 	return ERR;
 
-	rect->left = (_tstol(szBuf) == 0)?_tstol(DEFAULT_WINDOW_LEFT):_tstol(szBuf);
+	rect->left = (_tstol(szBuf) < 0)?_tstol(DEFAULT_WINDOW_LEFT):_tstol(szBuf);
+
+	// –¢Žg—p
+	rect->bottom = 0;
+	rect->right = 0;
 
 	return OK;
 }
